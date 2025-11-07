@@ -1,28 +1,18 @@
-import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import os
 
-# Ambil URL dari environment Railway, atau fallback ke lokal
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:HXDfPtEnAQUAvkyiiKLSFpzhlMwHmGAP@ballast.proxy.rlwy.net:43287/railway"
-)
+# Ambil URL dari Railway
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Tambahkan SSL mode agar aman di Railway
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://")
+# Tambahkan sslmode=require jika belum ada
+if DATABASE_URL and "sslmode" not in DATABASE_URL:
+    DATABASE_URL += "?sslmode=require"
 
-# Engine koneksi
-engine = create_engine(DATABASE_URL, connect_args={"sslmode": "require"}, echo=True)
+# Buat koneksi
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-# Session dan Base ORM
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
 
-# Dependency untuk session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+Base = declarative_base()
