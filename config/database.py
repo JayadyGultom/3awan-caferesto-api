@@ -6,7 +6,7 @@ import os
 # ==============================================================
 # 1️⃣ Ambil URL database dari environment Railway
 # ==============================================================
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("postgresql://postgres:HXDfPtEnAQUAvkyiiKLSFpzhlMwHmGAP@ballast.proxy.rlwy.net:43287/railway")
 
 if not DATABASE_URL:
     raise ValueError("❌ DATABASE_URL tidak ditemukan di environment Railway!")
