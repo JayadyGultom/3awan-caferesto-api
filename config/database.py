@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Ambil URL dari environment Railway, atau fallback ke lokal
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:HXDfPtEnAQUAvkyiiKLSFpzhlMwHmGAP@ballast.proxy.rlwy.net:43287/railway"
+    "postgresql://postgres:kTEwxcyiWifwirfhWkfasnwURezzAYPI@tramway.proxy.rlwy.net:30273/railway"
 )
 
 # Tambahkan SSL mode agar aman di Railway
