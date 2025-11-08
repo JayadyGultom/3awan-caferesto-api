@@ -13,6 +13,18 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # Buat tabel otomatis
 Base.metadata.create_all(bind=engine)
 
+# ✅ Seed data awal (jika belum ada)
+try:
+    from seed_data import seed_status_pembayaran, seed_status_pengiriman, seed_kategori
+    print("🌱 Checking initial data...")
+    seed_status_pembayaran()
+    seed_status_pengiriman()
+    seed_kategori()
+    print("✅ Initial data check completed!")
+except Exception as e:
+    print(f"⚠️ Warning: Could not seed initial data: {e}")
+    print("💡 You can run 'python seed_data.py' manually if needed")
+
 # Daftarkan semua routes
 for r in semua_routes:
     app.register_blueprint(r)

@@ -1,17 +1,18 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin  # ✅ biar Flutter Web bisa akses
-from config.database import SessionLocal
+from sqlalchemy.orm import Session
+from config.database import get_db
 from models.user_account_model import Pengguna
 from werkzeug.security import generate_password_hash, check_password_hash
 
 pengguna_routes = Blueprint("pengguna_routes", __name__)
-session = SessionLocal()
 
 
 # 🟢 REGISTER PENGGUNA
 @pengguna_routes.route("/pengguna/register", methods=["POST"])
 @cross_origin()  # izinkan akses Flutter Web
 def register_pengguna():
+    db: Session = next(get_db())
     try:
         data = request.get_json(force=True, silent=True)
         email = data.get("email")
@@ -27,7 +28,7 @@ def register_pengguna():
             }), 400
 
         # Cek apakah email sudah terdaftar
-        existing = session.query(Pengguna).filter_by(email=email).first()
+        existing = db.query(Pengguna).filter_by(email=email).first()
         if existing:
             return jsonify({
                 "success": False,
@@ -44,8 +45,9 @@ def register_pengguna():
             status=status
         )
 
-        session.add(pengguna_baru)
-        session.commit()
+        db.add(pengguna_baru)
+        db.commit()
+        db.refresh(pengguna_baru)
 
         return jsonify({
             "success": True,
@@ -59,6 +61,7 @@ def register_pengguna():
         }), 201
 
     except Exception as e:
+        db.rollback()
         print("Error register:", e)
         return jsonify({
             "success": False,
@@ -66,13 +69,14 @@ def register_pengguna():
         }), 500
 
     finally:
-        session.close()
+        db.close()
 
 
 # 🟠 LOGIN PENGGUNA
 @pengguna_routes.route("/pengguna/login", methods=["POST"])
 @cross_origin()  # izinkan akses Flutter Web
 def login_pengguna():
+    db: Session = next(get_db())
     try:
         data = request.get_json(force=True, silent=True)
         email = data.get("email")
@@ -85,7 +89,7 @@ def login_pengguna():
                 "message": "Email dan kata sandi wajib diisi"
             }), 400
 
-        pengguna = session.query(Pengguna).filter_by(email=email).first()
+        pengguna = db.query(Pengguna).filter_by(email=email).first()
 
         if not pengguna:
             return jsonify({
@@ -120,4 +124,4 @@ def login_pengguna():
         }), 500
 
     finally:
-        session.close()
+        db.close()
